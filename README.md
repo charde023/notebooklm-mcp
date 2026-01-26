@@ -1,6 +1,6 @@
 # NotebookLM Assistant for Claude (Desktop & CLI)
 
-This project provides a powerful MCP (Model Context Protocol) server that brings the full power of Google NotebookLM into Claude.
+A powerful MCP (Model Context Protocol) server that brings Google NotebookLM into Claude Desktop and Claude Code.
 
 ## Features
 
@@ -13,27 +13,56 @@ This project provides a powerful MCP (Model Context Protocol) server that brings
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
-
 ### 1. Install uv (Python Package Manager)
 
+<details>
+<summary><strong>macOS / Linux</strong></summary>
+
 ```bash
-# macOS/Linux
+# Using curl
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Or with Homebrew
+# Or with Homebrew (macOS)
 brew install uv
 ```
+
+Default install location: `~/.local/bin/uv`
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+```powershell
+# Using PowerShell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or with Scoop
+scoop install uv
+
+# Or with winget
+winget install --id=astral-sh.uv -e
+```
+
+Default install location: `%USERPROFILE%\.local\bin\uv.exe`
+
+</details>
 
 Verify installation:
 ```bash
 uv --version
 ```
 
-### 2. Install Dependencies
+### 2. Clone and Install Dependencies
 
 ```bash
-cd /Users/alfredang/projects/notebooklm-assistant
+# Clone the repository
+git clone https://github.com/alfredang/notebooklm-assistant.git
+
+# Navigate to the project folder
+cd notebooklm-assistant
+
+# Install dependencies
 uv sync
 ```
 
@@ -46,7 +75,7 @@ This will create a `.venv` folder and install all required packages.
 NotebookLM uses browser-based authentication. You must login once to save your session cookies.
 
 ```bash
-cd /Users/alfredang/projects/notebooklm-assistant
+cd notebooklm-assistant
 uv run notebooklm login
 ```
 
@@ -80,7 +109,7 @@ You should see: `Authenticated! Found X notebooks.`
 Before configuring Claude, verify the server starts correctly:
 
 ```bash
-cd /Users/alfredang/projects/notebooklm-assistant
+cd notebooklm-assistant
 uv run python server.py
 ```
 
@@ -91,46 +120,104 @@ NotebookLM client initialized successfully
 Starting MCP server 'NotebookLM' with transport 'stdio'
 ```
 
-Press `Ctrl+C` to stop the server after confirming it works.
+Press `Ctrl+C` (or `Cmd+C` on Mac) to stop the server after confirming it works.
 
 ---
 
-## Step 3: Setup for Claude Desktop (GUI)
+## Step 3: Setup for Claude Desktop
 
-### 3.1 Locate the Config File
+### 3.1 Find Your Paths
 
-Open Terminal and run:
-```bash
-# Create the config file if it doesn't exist
-mkdir -p ~/Library/Application\ Support/Claude
-touch ~/Library/Application\ Support/Claude/claude_desktop_config.json
+You'll need two paths for the configuration:
 
-# Open in your default editor
-open ~/Library/Application\ Support/Claude/claude_desktop_config.json
-```
+**Find your `uv` path:**
 
-### 3.2 Find Your uv Path
-
-Claude Desktop doesn't inherit your shell's PATH, so you need the **full path** to `uv`:
+<details>
+<summary><strong>macOS / Linux</strong></summary>
 
 ```bash
 which uv
 ```
+Example output: `/Users/yourname/.local/bin/uv`
 
-This will output something like `/Users/alfredang/.local/bin/uv` - use this path in the next step.
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+```powershell
+where uv
+```
+Example output: `C:\Users\yourname\.local\bin\uv.exe`
+
+</details>
+
+**Find your project path:**
+
+<details>
+<summary><strong>macOS / Linux</strong></summary>
+
+```bash
+cd notebooklm-assistant && pwd
+```
+Example output: `/Users/yourname/projects/notebooklm-assistant`
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+```powershell
+cd notebooklm-assistant; (Get-Location).Path
+```
+Example output: `C:\Users\yourname\projects\notebooklm-assistant`
+
+</details>
+
+### 3.2 Open the Config File
+
+<details>
+<summary><strong>macOS</strong></summary>
+
+```bash
+# Create config directory if needed
+mkdir -p ~/Library/Application\ Support/Claude
+
+# Open config file
+open ~/Library/Application\ Support/Claude/claude_desktop_config.json
+```
+
+Config path: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+```powershell
+# Open config file (create if doesn't exist)
+notepad "$env:APPDATA\Claude\claude_desktop_config.json"
+```
+
+Config path: `%APPDATA%\Claude\claude_desktop_config.json`
+
+</details>
 
 ### 3.3 Add the MCP Server Configuration
 
-**If the file is empty**, paste this entire block (replace the uv path if different):
+> **Important:** Replace `<UV_PATH>` and `<PROJECT_PATH>` with your actual paths from Step 3.1
+
+<details>
+<summary><strong>macOS / Linux Configuration</strong></summary>
 
 ```json
 {
   "mcpServers": {
     "notebooklm": {
-      "command": "/Users/alfredang/.local/bin/uv",
+      "command": "<UV_PATH>",
       "args": [
         "--directory",
-        "/Users/alfredang/projects/notebooklm-assistant",
+        "<PROJECT_PATH>",
         "run",
         "python",
         "server.py"
@@ -140,17 +227,15 @@ This will output something like `/Users/alfredang/.local/bin/uv` - use this path
 }
 ```
 
-**If you already have other MCP servers**, add the `notebooklm` entry inside the existing `mcpServers` object:
-
+**Example with real paths:**
 ```json
 {
   "mcpServers": {
-    "existing-server": { ... },
     "notebooklm": {
-      "command": "/Users/alfredang/.local/bin/uv",
+      "command": "/Users/yourname/.local/bin/uv",
       "args": [
         "--directory",
-        "/Users/alfredang/projects/notebooklm-assistant",
+        "/Users/yourname/projects/notebooklm-assistant",
         "run",
         "python",
         "server.py"
@@ -159,12 +244,59 @@ This will output something like `/Users/alfredang/.local/bin/uv` - use this path
   }
 }
 ```
+
+</details>
+
+<details>
+<summary><strong>Windows Configuration</strong></summary>
+
+```json
+{
+  "mcpServers": {
+    "notebooklm": {
+      "command": "<UV_PATH>",
+      "args": [
+        "--directory",
+        "<PROJECT_PATH>",
+        "run",
+        "python",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+
+**Example with real paths:**
+```json
+{
+  "mcpServers": {
+    "notebooklm": {
+      "command": "C:\\Users\\yourname\\.local\\bin\\uv.exe",
+      "args": [
+        "--directory",
+        "C:\\Users\\yourname\\projects\\notebooklm-assistant",
+        "run",
+        "python",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+
+> **Note:** On Windows, use double backslashes (`\\`) in JSON paths.
+
+</details>
 
 ### 3.4 Restart Claude Desktop
 
-1. **Fully quit** Claude Desktop (Cmd+Q, not just close the window)
-2. Reopen Claude Desktop
-3. Look for the **hammer icon** (🔨) in the chat input area - this indicates MCP tools are available
+| Platform | How to Restart |
+|----------|----------------|
+| **macOS** | Press `Cmd+Q` to fully quit, then reopen |
+| **Windows** | Right-click tray icon → Quit, then reopen |
+
+Look for the **hammer icon** in the chat input area - this indicates MCP tools are available.
 
 ### 3.5 Verify Connection
 
@@ -173,7 +305,7 @@ In Claude Desktop, type:
 List my NotebookLM notebooks
 ```
 
-Claude should use the `list_notebooks` tool and show your notebooks.
+Claude should use the `list_notebooks` tool and display your notebooks.
 
 ---
 
@@ -181,9 +313,35 @@ Claude should use the `list_notebooks` tool and show your notebooks.
 
 ### 4.1 Add the MCP Server
 
+Replace `<PROJECT_PATH>` with your actual project path:
+
+<details>
+<summary><strong>macOS / Linux</strong></summary>
+
 ```bash
-claude mcp add notebooklm -- uv --directory /Users/alfredang/projects/notebooklm-assistant run python server.py
+claude mcp add notebooklm -- uv --directory <PROJECT_PATH> run python server.py
 ```
+
+**Example:**
+```bash
+claude mcp add notebooklm -- uv --directory /Users/yourname/projects/notebooklm-assistant run python server.py
+```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+```powershell
+claude mcp add notebooklm -- uv --directory <PROJECT_PATH> run python server.py
+```
+
+**Example:**
+```powershell
+claude mcp add notebooklm -- uv --directory C:\Users\yourname\projects\notebooklm-assistant run python server.py
+```
+
+</details>
 
 ### 4.2 Verify the Server is Added
 
@@ -209,7 +367,7 @@ List my NotebookLM notebooks
 
 ## Usage Examples
 
-Once configured, you can use natural language commands in Claude Desktop or Claude Code:
+Once configured, use natural language commands in Claude Desktop or Claude Code:
 
 | Task | Example Command |
 |------|-----------------|
@@ -248,43 +406,43 @@ Once configured, you can use natural language commands in Claude Desktop or Clau
 
 ## Troubleshooting
 
-### "Server disconnected" or "Failed to spawn process: No such file or directory"
+### "Server disconnected" or "Failed to spawn process"
 
 **Cause**: Claude Desktop can't find `uv` because it doesn't inherit your shell's PATH.
 
-**Solution**: Use the **full path** to `uv` in the config:
+**Solution**: Use the **full absolute path** to `uv` in the config (see Step 3.1).
 
-1. Find your uv path:
-   ```bash
-   which uv
-   ```
-
-2. Update `claude_desktop_config.json` to use the full path:
-   ```json
-   "command": "/Users/alfredang/.local/bin/uv"
-   ```
-   (Replace with your actual path from step 1)
-
-3. Fully restart Claude Desktop (Cmd+Q and reopen)
-
-**If authentication expired**, also run:
-```bash
-cd /Users/alfredang/projects/notebooklm-assistant
-uv run notebooklm login
-```
+---
 
 ### "Command not found: uv"
 
-**Cause**: uv is not in your PATH.
+<details>
+<summary><strong>macOS / Linux</strong></summary>
 
-**Solution**:
+Add to your shell profile (`~/.zshrc` or `~/.bashrc`):
 ```bash
-# Add to your shell profile (~/.zshrc or ~/.bashrc)
 export PATH="$HOME/.local/bin:$PATH"
-
-# Reload shell
-source ~/.zshrc
 ```
+
+Then reload:
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+Add to your PATH:
+1. Open System Properties → Environment Variables
+2. Under "User variables", edit `Path`
+3. Add: `%USERPROFILE%\.local\bin`
+4. Restart your terminal
+
+</details>
+
+---
 
 ### MCP Server Not Appearing in Claude Desktop
 
@@ -293,7 +451,9 @@ source ~/.zshrc
 **Solution**:
 1. Validate your JSON at https://jsonlint.com/
 2. Ensure no trailing commas in the JSON
-3. Fully quit Claude Desktop (Cmd+Q) and reopen
+3. Fully quit and reopen Claude Desktop
+
+---
 
 ### "NotebookLM client not initialized"
 
@@ -303,23 +463,41 @@ source ~/.zshrc
 1. Run `uv run notebooklm login` first
 2. Restart Claude Desktop or re-add the MCP server in Claude Code
 
+---
+
 ### Check Claude Desktop Logs
 
-For detailed error information:
+<details>
+<summary><strong>macOS</strong></summary>
+
 ```bash
 # View recent logs
 tail -100 ~/Library/Logs/Claude/mcp*.log
 
-# Or open in Console app
+# Or open in Finder
 open ~/Library/Logs/Claude/
 ```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+```powershell
+# View logs folder
+explorer "$env:APPDATA\Claude\logs"
+```
+
+</details>
+
+---
 
 ### Remove and Re-add MCP Server (Claude Code)
 
 If issues persist:
 ```bash
 claude mcp remove notebooklm
-claude mcp add notebooklm -- uv --directory /Users/alfredang/projects/notebooklm-assistant run python server.py
+claude mcp add notebooklm -- uv --directory <PROJECT_PATH> run python server.py
 ```
 
 ---
@@ -328,7 +506,7 @@ claude mcp add notebooklm -- uv --directory /Users/alfredang/projects/notebooklm
 
 To update the NotebookLM library:
 ```bash
-cd /Users/alfredang/projects/notebooklm-assistant
+cd notebooklm-assistant
 uv sync --upgrade
 ```
 
@@ -344,3 +522,9 @@ notebooklm-assistant/
 ├── SKILL.md           # Claude Code skill definition
 └── .venv/             # Virtual environment (auto-created)
 ```
+
+---
+
+## License
+
+MIT License
