@@ -176,30 +176,25 @@ Example output: `C:\Users\yourname\projects\notebooklm-assistant`
 
 ### 3.2 Open the Config File
 
+**From Claude Desktop (Recommended):**
+
+1. Open Claude Desktop
+2. Go to **Settings** (gear icon) → **Developer** → **Edit Config**
+3. This opens `claude_desktop_config.json` in your default editor
+
+**Or manually:**
+
 <details>
-<summary><strong>macOS</strong></summary>
+<summary>macOS path</summary>
 
-```bash
-# Create config directory if needed
-mkdir -p ~/Library/Application\ Support/Claude
-
-# Open config file
-open ~/Library/Application\ Support/Claude/claude_desktop_config.json
-```
-
-Config path: `~/Library/Application Support/Claude/claude_desktop_config.json`
+`~/Library/Application Support/Claude/claude_desktop_config.json`
 
 </details>
 
 <details>
-<summary><strong>Windows</strong></summary>
+<summary>Windows path</summary>
 
-```powershell
-# Open config file (create if doesn't exist)
-notepad "$env:APPDATA\Claude\claude_desktop_config.json"
-```
-
-Config path: `%APPDATA%\Claude\claude_desktop_config.json`
+`%APPDATA%\Claude\claude_desktop_config.json`
 
 </details>
 
