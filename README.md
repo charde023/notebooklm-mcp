@@ -1,4 +1,4 @@
-# NotebookLM Assistant for Claude (Desktop & CLI)
+# NotebookLM MCP for Claude (Desktop & CLI)
 
 A powerful MCP (Model Context Protocol) server that brings Google NotebookLM into Claude Desktop and Claude Code.
 
