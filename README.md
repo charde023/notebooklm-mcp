@@ -62,11 +62,16 @@ git clone https://github.com/alfredang/notebooklm-assistant.git
 # Navigate to the project folder
 cd notebooklm-assistant
 
-# Install dependencies
+# Install dependencies (includes notebooklm-py and fastmcp)
 uv sync
 ```
 
-This will create a `.venv` folder and install all required packages.
+This will:
+- Create a `.venv` virtual environment
+- Install **notebooklm-py** (Python client for NotebookLM API)
+- Install **fastmcp** (MCP server framework)
+
+> **Note:** These dependencies are required for both Claude Desktop and Claude Code.
 
 ---
 
@@ -305,6 +310,8 @@ Claude should use the `list_notebooks` tool and display your notebooks.
 ---
 
 ## Step 4: Setup for Claude Code (CLI)
+
+> **Prerequisites:** Complete Steps 1-2 first (install dependencies with `uv sync` and authenticate with `uv run notebooklm login`).
 
 ### 4.1 Add the MCP Server
 
