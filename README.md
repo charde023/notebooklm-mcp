@@ -57,10 +57,10 @@ uv --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/alfredang/notebooklm-assistant.git
+git clone https://github.com/alfredang/notebooklm-mcp.git
 
 # Navigate to the project folder
-cd notebooklm-assistant
+cd notebooklm-mcp
 
 # Install dependencies (includes notebooklm-py and fastmcp)
 uv sync
@@ -80,7 +80,7 @@ This will:
 NotebookLM uses browser-based authentication. You must login once to save your session cookies.
 
 ```bash
-cd notebooklm-assistant
+cd notebooklm-mcp
 uv run notebooklm login
 ```
 
@@ -114,7 +114,7 @@ You should see: `Authenticated! Found X notebooks.`
 Before configuring Claude, verify the server starts correctly:
 
 ```bash
-cd notebooklm-assistant
+cd notebooklm-mcp
 uv run python server.py
 ```
 
@@ -163,9 +163,9 @@ Example output: `C:\Users\yourname\.local\bin\uv.exe`
 <summary><strong>macOS / Linux</strong></summary>
 
 ```bash
-cd notebooklm-assistant && pwd
+cd notebooklm-mcp && pwd
 ```
-Example output: `/Users/yourname/projects/notebooklm-assistant`
+Example output: `/Users/yourname/projects/notebooklm-mcp`
 
 </details>
 
@@ -173,9 +173,9 @@ Example output: `/Users/yourname/projects/notebooklm-assistant`
 <summary><strong>Windows</strong></summary>
 
 ```powershell
-cd notebooklm-assistant; (Get-Location).Path
+cd notebooklm-mcp; (Get-Location).Path
 ```
-Example output: `C:\Users\yourname\projects\notebooklm-assistant`
+Example output: `C:\Users\yourname\projects\notebooklm-mcp`
 
 </details>
 
@@ -235,7 +235,7 @@ Example output: `C:\Users\yourname\projects\notebooklm-assistant`
       "command": "/Users/yourname/.local/bin/uv",
       "args": [
         "--directory",
-        "/Users/yourname/projects/notebooklm-assistant",
+        "/Users/yourname/projects/notebooklm-mcp",
         "run",
         "python",
         "server.py"
@@ -275,7 +275,7 @@ Example output: `C:\Users\yourname\projects\notebooklm-assistant`
       "command": "C:\\Users\\yourname\\.local\\bin\\uv.exe",
       "args": [
         "--directory",
-        "C:\\Users\\yourname\\projects\\notebooklm-assistant",
+        "C:\\Users\\yourname\\projects\\notebooklm-mcp",
         "run",
         "python",
         "server.py"
@@ -326,7 +326,7 @@ claude mcp add notebooklm -- uv --directory <PROJECT_PATH> run python server.py
 
 **Example:**
 ```bash
-claude mcp add notebooklm -- uv --directory /Users/yourname/projects/notebooklm-assistant run python server.py
+claude mcp add notebooklm -- uv --directory /Users/yourname/projects/notebooklm-mcp run python server.py
 ```
 
 </details>
@@ -340,7 +340,7 @@ claude mcp add notebooklm -- uv --directory <PROJECT_PATH> run python server.py
 
 **Example:**
 ```powershell
-claude mcp add notebooklm -- uv --directory C:\Users\yourname\projects\notebooklm-assistant run python server.py
+claude mcp add notebooklm -- uv --directory C:\Users\yourname\projects\notebooklm-mcp run python server.py
 ```
 
 </details>
@@ -508,7 +508,7 @@ claude mcp add notebooklm -- uv --directory <PROJECT_PATH> run python server.py
 
 To update the NotebookLM library:
 ```bash
-cd notebooklm-assistant
+cd notebooklm-mcp
 uv sync --upgrade
 ```
 
@@ -517,7 +517,7 @@ uv sync --upgrade
 ## Project Structure
 
 ```
-notebooklm-assistant/
+notebooklm-mcp/
 ├── server.py          # MCP server implementation
 ├── pyproject.toml     # Project dependencies
 ├── README.md          # This file
