@@ -1,0 +1,61 @@
+{
+    "topics": [
+        "구글,엔트로픽",
+        "ai",
+        "하이닉스, 삼성, 반도체"
+    ],
+    "schedule_time": "03:00",
+    "media": {
+        "slide_deck": {
+            "enabled": true,
+            "option": "자세히",
+            "instruction": "비즈니스 전문가를 위한 심층 보고서 형식으로 구체적인 데이터와 주요 인용구를 포함해 상세하게 작성해주세요."
+        },
+        "audio": {
+            "enabled": true,
+            "option": "길게",
+            "instruction": "전문적이고 분석적인 뉴스 브리핑 톤으로 남녀가 교차 진행하며, 단순히 뉴스의 사실만 읽지 말고 산업에 미치는 파급력과 전망까지 깊게 토론(Deep Dive)해 주세요."
+        },
+        "video": {
+            "enabled": false,
+            "option": "보통",
+            "instruction": "시각적으로 매력적이고 핵심 정보를 잘 전달할 수 있는 비디오 스크립트 형태의 개요를 작성해주세요."
+        },
+        "infographic": {
+            "enabled": true,
+            "option": "상세히",
+            "instruction": "오늘 뉴스의 가장 핵심이 되는 트렌드 변화, 통계 지표, 그리고 관련 기업들의 동향을 한눈에 들어오는 다이어그램 구조로 꼼꼼하게 요약해주세요."
+        },
+        "report": {
+            "enabled": false,
+            "option": "보통",
+            "instruction": "주요 핵심 사항과 함께 뉴스의 배경, 시사점을 포함한 종합적인 브리핑 문서를 작성해주세요."
+        },
+        "data_table": {
+            "enabled": false,
+            "option": "보통",
+            "instruction": "뉴스 기사에 등장하는 주요 통계치, 기업 실적, 지표 등을 추출하여 한눈에 비교할 수 있는 데이터 표(테이블) 형태로 정리해주세요."
+        },
+        "mind_map": {
+            "enabled": false,
+            "option": "보통",
+            "instruction": "주요 뉴스 테마를 중심으로 서브 토픽, 파생 효과들을 가지치기하듯 연결한 마인드맵 텍스트 구조로 핵심 개념들을 시각적으로 맵핑해주세요."
+        },
+        "study_guide": {
+            "enabled": false,
+            "option": "심층",
+            "instruction": "이 내용을 처음 배우는 학생을 위한 친절한 설명과 퀴즈를 포함한 스터디 가이드를 만들어주세요."
+        },
+        "quiz": {
+            "enabled": false,
+            "option": "보통 (5개)",
+            "instruction": "이 뉴스 주제에 대해 독자들이 내용을 제대로 이해했는지 확인할 수 있는 핵심 퀴즈와 정답 해설을 구성해주세요."
+        },
+        "flashcards": {
+            "enabled": false,
+            "option": "보통 (10개)",
+            "instruction": "뉴스에서 꼭 기억해야 할 주요 키워드와 개념들의 핵심만 모아서 빠르게 복습할 수 있는 암기용 플래시카드 세트를 작성해주세요."
+        }
+    },
+    "search_type": "deep"
+}

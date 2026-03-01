@@ -5,3 +5,4 @@ __pycache__/
 storage_state.json
 .notebooklm/
 .env
+logs/
