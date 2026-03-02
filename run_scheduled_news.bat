@@ -1,5 +1,6 @@
 @echo off
 chcp 65001 > nul
+set PYTHONIOENCODING=utf-8
 cd /d "C:\workspace\Daily_news\notebooklm-mcp"
 if not exist logs mkdir logs
 for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set datetime=%%I

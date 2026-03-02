@@ -23,25 +23,38 @@ async def run_all_topics():
     instructions = config.get("media", {})
     search_type = config.get("search_type", "deep") # 기본값 deep
     
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 총 {len(topics)}개의 주제(Topic)에 대해 데일리 {search_type} 뉴스 파이프라인 병렬 처리를 시작합니다.")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] 총 {len(topics)}개의 주제(Topic)에 대해 데일리 {search_type} 뉴스 파이프라인 순차 처리를 시작합니다.")
     print("="*60)
     
-    tasks = []
-    for idx, topic in enumerate(topics, 1):
-        print(f"\n▶ [{idx}/{len(topics)}] 주제 큐에 추가: '{topic}'")
-        tasks.append(daily_deep_news.run_news_flow(topic, instructions, search_type))
-        
-    # Execute all topics concurrently
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+    results = []
     
-    for idx, (topic, result) in enumerate(zip(topics, results), 1):
+    for idx, topic in enumerate(topics):
+        short_topic = topic.replace('\n', ' ').strip()
+        if len(short_topic) > 30:
+            short_topic = short_topic[:30] + "..."
+        print(f"\n▶ [{idx+1}/{len(topics)}] 주제 처리 시작: '{short_topic}'")
+        
+        try:
+            # 순차 실행 (하나가 완전히 끝나야 다음으로 넘어감)
+            result = await daily_deep_news.run_news_flow(topic, instructions, search_type)
+            results.append((topic, result))
+        except Exception as e:
+            results.append((topic, e))
+            
+    # 전체 요약 출력
+    print("\n" + "="*60)
+    for idx, (topic, result) in enumerate(results, 1):
+        short_topic = topic.replace('\n', ' ').strip()
+        if len(short_topic) > 30:
+            short_topic = short_topic[:30] + "..."
+            
         if isinstance(result, Exception):
-            print(f"[!] '{topic}' 실행 중 에러 발생: {result}")
+            print(f"[!] '{short_topic}' 실행 중 에러 발생: {result}")
         else:
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] '{topic}' 완료!")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] '{short_topic}' 완료!")
             
     print("="*60)
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 스케줄링된 모든 주제의 병렬 작업이 마무리되었습니다.")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] 스케줄링된 모든 주제의 순차 작업이 마무리되었습니다.")
 
 if __name__ == "__main__":
     if sys.platform == 'win32':
