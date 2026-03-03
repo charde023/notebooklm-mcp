@@ -6,3 +6,8 @@ storage_state.json
 .notebooklm/
 .env
 logs/
+
+# PyInstaller artifacts
+build/
+*.spec
+*.lnk

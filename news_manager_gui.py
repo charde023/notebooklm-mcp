@@ -6,10 +6,12 @@ import subprocess
 from pathlib import Path
 import threading
 from datetime import datetime
+import ctypes
 
 ctk.set_appearance_mode("Dark")
 
 # Color Palette (다크 & 네온 민트 모던 테마)
+TRANSPARENT_COLOR = "#000001" # 윈도우 투명 처리를 위한 특수 키 컬러
 APP_BG = "#121212"    # 최상단 어두운 배경
 PANEL_BG = "#1E1E1E"  # 콘텐츠 창 배경
 TEXT_MAIN = "#FFFFFF" # 메인 텍스트 (흰색)
@@ -158,15 +160,29 @@ class NewsManagerApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("NotebookLM 데일리 뉴스 매니저")
-        # 1화면에 들어오도록 세로 좀 줄이고 가로를 대폭 넓힘 (좌/우 2열 배치)
-        self.geometry("1450x880")
-        self.configure(fg_color=APP_BG)
         
-        # Grid 1x2 설정: 왼쪽은 고정 크기(기본 컨텐츠 크기 유지), 오른쪽만 확장됨
-        self.grid_columnconfigure(0, weight=0, minsize=480) # Left Column (Fixed Width 약간 넓힘)
-        self.grid_columnconfigure(1, weight=1)              # Right Column (Expandable)
-        self.grid_rowconfigure(0, weight=1)
+        # 라운드 테두리 및 커스텀 타이틀바를 위한 윈도우 속성 설정 (기존보다 패딩/그림자 여백을 위해 약간 키움)
+        self.geometry("1470x900") 
+        self.configure(fg_color=TRANSPARENT_COLOR)
         
+        # 윈도우 기본 틀(테두리, 타이틀바) 제거 및 완전히 투명한 배경 처리 (Windows 전용)
+        if os.name == 'nt':
+            self.overrideredirect(True)
+            self.attributes("-transparentcolor", TRANSPARENT_COLOR)
+            self.after(10, self.set_appwindow) # 작업 표시줄 표시 트릭
+            
+        # 메인 라운딩 섀도우 컨테이너 (실질적인 깔끔한 앱 배경)
+        self.main_container = ctk.CTkFrame(self, fg_color=APP_BG, corner_radius=20, border_color=BORDER_COLOR, border_width=1)
+        self.main_container.pack(fill="both", expand=True, padx=15, pady=15)
+        
+        # 커스텀 타이틀 바 생성
+        self.create_title_bar()
+        
+        # Grid 1x2 설정: 왼쪽은 고정 크기, 오른쪽만 확장 (이제 main_container 내부에 배치)
+        self.main_container.grid_columnconfigure(0, weight=0, minsize=480) 
+        self.main_container.grid_columnconfigure(1, weight=1)              
+        self.main_container.grid_rowconfigure(1, weight=1) # 0번 로우는 타이틀바
+
         self.config_data = self.load_config()
         self.media_widgets = {}   # 미디어별 동적 위젯 객체 저장용 { "slide": {"checkbox_var", "frame", "seg_btn", "textbox"} }
         
@@ -175,6 +191,66 @@ class NewsManagerApp(ctk.CTk):
         
         self.populate_topics()
         self.refresh_media_panels()
+
+    def set_appwindow(self):
+        try:
+            # 작업 표시줄에 앱 구동 아이콘이 정상적으로 뜨도록 강제 커널 속성 부여
+            hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
+            style = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
+            style = style & ~0x00000080 | 0x00040000
+            ctypes.windll.user32.SetWindowLongW(hwnd, -20, style)
+            self.withdraw()
+            self.deiconify()
+        except:
+            pass
+
+    def create_title_bar(self):
+        # 상단 드래그 가능한 타이틀바 영역
+        self.title_bar = ctk.CTkFrame(self.main_container, height=45, fg_color=APP_BG, corner_radius=20)
+        self.title_bar.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(5, 0))
+        
+        # 창 잡고 이동하기 이벤트 바인딩
+        self.title_bar.bind("<ButtonPress-1>", self.start_move)
+        self.title_bar.bind("<B1-Motion>", self.do_move)
+        
+        # 타이틀 (라벨)
+        title_lbl = ctk.CTkLabel(self.title_bar, text=" ✨ NotebookLM 뉴스 매니저", font=("Malgun Gothic", 14, "bold"), text_color=TEXT_MAIN)
+        title_lbl.pack(side="left", padx=20, pady=10)
+        title_lbl.bind("<ButtonPress-1>", self.start_move)
+        title_lbl.bind("<B1-Motion>", self.do_move)
+        
+        # 우측 윈도우 컨트롤 버튼들 (최소화, 닫기)
+        ctrl_frame = ctk.CTkFrame(self.title_bar, fg_color="transparent")
+        ctrl_frame.pack(side="right", padx=15, pady=5)
+        
+        btn_min = ctk.CTkButton(ctrl_frame, text="─", width=35, height=30, font=("Malgun Gothic", 14, "bold"), fg_color="transparent", hover_color=BTN_DARK_HOVER, text_color=TEXT_MAIN, command=self.minimize_window)
+        btn_min.pack(side="left", padx=(0, 5))
+        
+        btn_close = ctk.CTkButton(ctrl_frame, text="✕", width=35, height=30, font=("Malgun Gothic", 14, "bold"), fg_color="transparent", hover_color="#FF4C4C", text_color=TEXT_MAIN, command=self.quit)
+        btn_close.pack(side="left")
+
+    def start_move(self, event):
+        self.x = event.x
+        self.y = event.y
+
+    def do_move(self, event):
+        deltax = event.x - self.x
+        deltay = event.y - self.y
+        x = self.winfo_x() + deltax
+        y = self.winfo_y() + deltay
+        self.geometry(f"+{x}+{y}")
+        
+    def minimize_window(self):
+        # overrideredirect 상태에서 윈도우 트레이 최소화 처리용 트릭
+        if os.name == 'nt':
+            self.overrideredirect(False)
+            self.iconify()
+            self.bind("<Map>", self.restore_window)
+            
+    def restore_window(self, event):
+        if os.name == 'nt':
+            self.overrideredirect(True)
+            self.unbind("<Map>")
         
     def load_config(self):
         conf = DEFAULT_CONFIG.copy()
@@ -266,7 +342,7 @@ class NewsManagerApp(ctk.CTk):
         self.btn_login.configure(state="disabled", text="⏳ 팝업 구동 중...")
         def _login_thread():
             try:
-                cmd = [UV_EXE, "run", str(LOGIN_HELPER)]
+                cmd = [sys.executable, "--run-login"]
                 startupinfo = None
                 if os.name == 'nt':
                     startupinfo = subprocess.STARTUPINFO()
@@ -287,8 +363,8 @@ class NewsManagerApp(ctk.CTk):
     def create_left_panel(self):
         pad_x = 15
         
-        self.left_scroll = ctk.CTkFrame(self, fg_color=APP_BG)
-        self.left_scroll.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        self.left_scroll = ctk.CTkFrame(self.main_container, fg_color=APP_BG)
+        self.left_scroll.grid(row=1, column=0, sticky="nsew", padx=(10, 5), pady=(0, 10))
         
         lbl_title = ctk.CTkLabel(self.left_scroll, text="NotebookLM News Manager", 
                                  font=FONT_TITLE, text_color=TEXT_MAIN)
@@ -380,8 +456,8 @@ class NewsManagerApp(ctk.CTk):
 
     # 우측 패널: 전체 미디어 체크박스 및 동적 프롬프트 설정창
     def create_right_panel(self):
-        self.right_scroll = ctk.CTkScrollableFrame(self, fg_color=APP_BG, scrollbar_button_color=BORDER_COLOR)
-        self.right_scroll.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+        self.right_scroll = ctk.CTkScrollableFrame(self.main_container, fg_color=APP_BG, scrollbar_button_color=BORDER_COLOR)
+        self.right_scroll.grid(row=1, column=1, sticky="nsew", padx=(5, 10), pady=(0, 10))
         
         hdr_frame = ctk.CTkFrame(self.right_scroll, fg_color="transparent")
         hdr_frame.pack(fill="x", padx=20, pady=(25, 20))
@@ -559,7 +635,7 @@ for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set da
 set logdate=%datetime:~0,4%%datetime:~4,2%%datetime:~6,2%
 echo ================================================== >> "logs\\daily_news_%logdate%.log"
 echo [ %datetime:~0,4%-%datetime:~4,2%-%datetime:~6,2% %datetime:~8,2%:%datetime:~10,2%:%datetime:~12,2% ] 스케줄 작업 시작 >> "logs\\daily_news_%logdate%.log"
-"{UV_EXE}" run "{RUN_SCRIPT}" >> "logs\\daily_news_%logdate%.log" 2>&1
+"{sys.executable}" --run-news >> "logs\\daily_news_%logdate%.log" 2>&1
 '''
         with open(BAT_WRAPPER, "w", encoding="utf-8") as f:
             f.write(wrapper_content)
@@ -622,7 +698,7 @@ echo [ %datetime:~0,4%-%datetime:~4,2%-%datetime:~6,2% %datetime:~8,2%:%datetime
                 log_date = datetime.now().strftime("%Y%m%d")
                 log_file = log_dir / f"daily_news_{log_date}.log"
                 
-                cmd = [UV_EXE, "run", str(RUN_SCRIPT)]
+                cmd = [sys.executable, "--run-news"]
                 startupinfo = None
                 if os.name == 'nt':
                     startupinfo = subprocess.STARTUPINFO()
@@ -745,5 +821,21 @@ echo [ %datetime:~0,4%-%datetime:~4,2%-%datetime:~6,2% %datetime:~8,2%:%datetime
         threading.Thread(target=_run_thread, daemon=True).start()
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
+    
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '--run-login':
+            from gui_login_helper import run_login_flow
+            run_login_flow()
+            sys.exit(0)
+        elif sys.argv[1] == '--run-news':
+            from run_all_news import run_all_topics
+            import asyncio
+            if sys.platform == 'win32':
+                asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+            asyncio.run(run_all_topics())
+            sys.exit(0)
+
     app = NewsManagerApp()
     app.mainloop()

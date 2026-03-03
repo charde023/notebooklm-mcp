@@ -29,7 +29,7 @@ async def get_notebooklm_client():
     cookies = extract_cookies_from_storage(state)
     csrf, session_id = await fetch_tokens(cookies)
     auth = AuthTokens(cookies=cookies, csrf_token=csrf, session_id=session_id)
-    return NotebookLMClient(auth)
+    return NotebookLMClient(auth, timeout=300.0)
 
 async def generate_slide_deck_task(client, nb_id, instructions_text: str, topic: str = ""):
     short_topic = topic.replace('\n', ' ').strip()

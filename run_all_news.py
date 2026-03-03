@@ -23,23 +23,30 @@ async def run_all_topics():
     instructions = config.get("media", {})
     search_type = config.get("search_type", "deep") # 기본값 deep
     
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 총 {len(topics)}개의 주제(Topic)에 대해 데일리 {search_type} 뉴스 파이프라인 순차 처리를 시작합니다.")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] 총 {len(topics)}개의 주제(Topic)에 대해 데일리 {search_type} 뉴스 파이프라인 병렬 처리를 시작합니다. (최대 3개 동시 실행)")
     print("="*60)
     
-    results = []
-    
-    for idx, topic in enumerate(topics):
+    # API Rate Limit 및 과부하 방지를 위해 동시에 최대 3개까지만 병렬 실행하도록 제한
+    sem = asyncio.Semaphore(3)
+
+    async def run_with_semaphore(idx, topic):
         short_topic = topic.replace('\n', ' ').strip()
         if len(short_topic) > 30:
             short_topic = short_topic[:30] + "..."
-        print(f"\n▶ [{idx+1}/{len(topics)}] 주제 처리 시작: '{short_topic}'")
+            
+        async with sem:
+            print(f"\n▶ [{idx+1}/{len(topics)}] 주제 처리 시작: '{short_topic}'")
+            return await daily_deep_news.run_news_flow(topic, instructions, search_type)
+
+    tasks = []
+    for idx, topic in enumerate(topics):
+        tasks.append(run_with_semaphore(idx, topic))
         
-        try:
-            # 순차 실행 (하나가 완전히 끝나야 다음으로 넘어감)
-            result = await daily_deep_news.run_news_flow(topic, instructions, search_type)
-            results.append((topic, result))
-        except Exception as e:
-            results.append((topic, e))
+    print(f"\n[{datetime.now().strftime('%H:%M:%S')}] 모든 주제의 제한적 병렬 처리(Semaphore)를 대기합니다...")
+    
+    # asyncio.gather를 사용하여 모든 작업을 병렬로 실행하되, 내부 Semaphore에 의해 최대 3개씩 끊어서 알아서 처리됨
+    gathered_results = await asyncio.gather(*tasks, return_exceptions=True)
+    results = list(zip(topics, gathered_results))
             
     # 전체 요약 출력
     print("\n" + "="*60)
